@@ -1,4 +1,6 @@
 import models
+from datetime import datetime
+from pony.orm import *
 
 
 patient_data = [
@@ -62,6 +64,20 @@ class Controller:
 
 
     def read(self, entity):
+        if entity == 'Patient':
+            @db_session
+            def show_patient():
+                birth_date = self.view.ask_question("Введите дату рождения: ")
+                birth_date_obj = datetime.strptime(birth_date, '%Y-%m-%d').date()
+                q = models.Patient.select(lambda p: p.date_of_birth == birth_date_obj)
+                if q.count() > 1:
+                    raise Exception("Patient not found")
+
+                q.show()
+
+            show_patient()
+            return
+
         self.view.show_error(f'Чтение для сущности {entity} не реализовано!')
 
 
